@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- NOTE: Enable Trusted Types via meta tag. Will be enabled by the server. See "../server.js" -->
+    <!-- <meta http-equiv='Content-Security-Policy' content="require-trusted-types-for 'script'; trusted-types my-policy;"> -->
+
+    <title>Basic application to be tested with cypress</title>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <div>
+      <button id="safe-html">safe html</button>
+      <button id="unsafe-html">unsafe html</button>
+    </div>
+    <div>
+      <button id="safe-script">safe script</button>
+      <button id="unsafe-script">unsafe script</button>
+    </div>
+    <div>
+      <button id="safe-script-url">safe script url</button>
+      <button id="unsafe-script-url">unsafe script url</button>
+    </div>
+  </body>
+
+  <script src="/main.js"></script>
+</html>

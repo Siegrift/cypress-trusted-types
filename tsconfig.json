@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": false,
+    "skipDefaultLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "module": "commonJS",
+    "target": "es6",
+    "lib": ["es6", "dom", "dom.iterable"],
+    "types": ["cypress"]
+  },
+  "include": ["src"]
+}
