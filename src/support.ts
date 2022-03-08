@@ -1,4 +1,5 @@
-import { AddCspMetaTagOptions, EnableCspThroughMetaTagOptions, TrustedValue, Violation } from './types';
+/// <reference path="./index.d.ts" />
+import { EnableCspThroughMetaTagOptions, TrustedValue, Violation } from './types';
 
 let catchTrustedTypesViolationsEnabled = false;
 let trustedTypesViolations: Violation[] = [];
@@ -28,29 +29,6 @@ Cypress.Commands.add('enableCspThroughMetaTag', (options?: EnableCspThroughMetaT
         .replace('<\\/head>/', '</head>');
     });
   }).as('enableCspThroughMetaTag');
-});
-
-// CSP policies merge so adding another CSP meta tag will not affect the ones already present in the HTML body
-Cypress.Commands.add('addCspMetaTag', (options?: AddCspMetaTagOptions) => {
-  const { urlPattern, cspValue } = options ?? {};
-
-  // Intercept all requests by default
-  cy.intercept(urlPattern ?? '**/*', (req) => {
-    return req.reply((res) => {
-      // The CSP should be provided by the user
-      expect(cspValue).to.be.a('string');
-      if (typeof res.body !== 'string') return;
-
-      res.body = res.body
-        .replace(
-          new RegExp('<head>([\\s\\S]*)</head>'),
-          new RegExp(`<head><meta http-equiv="Content-Security-Policy" content="${cspValue}">$1</head>`).toString()
-        )
-        // The following are caused because the regex replacement above inserts some characters
-        .replace('/<head>', '<head>')
-        .replace('<\\/head>/', '</head>');
-    });
-  }).as('addCspMetaTag');
 });
 
 Cypress.Commands.add('parseCspFromMetaTags', () => {

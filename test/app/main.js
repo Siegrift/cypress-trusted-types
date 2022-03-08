@@ -7,11 +7,20 @@ const unsafeScriptUrlElem = document.getElementById('unsafe-script-url');
 
 // In real world application make sure the policy is enclosed in module (not exported)
 // and it's usage is restricted.
-const myPolicy = window.trustedTypes.createPolicy('my-policy', {
-  createHTML: (s) => s,
-  createScript: (s) => s,
-  createScriptURL: (s) => s,
-});
+let myPolicy;
+if (window.trustedTypes) {
+  myPolicy = window.trustedTypes.createPolicy('my-policy', {
+    createHTML: (s) => s,
+    createScript: (s) => s,
+    createScriptURL: (s) => s,
+  });
+} else {
+  myPolicy = {
+    createHTML: (s) => s,
+    createScript: (s) => s,
+    createScriptURL: (s) => s,
+  };
+}
 
 safeHtmlElem.addEventListener('click', () => {
   const iframe = document.createElement('iframe');
