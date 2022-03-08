@@ -1,4 +1,4 @@
-# cypress-trusted-types [![ContinuousBuild](https://github.com/siegrift/cypress-trusted-types/actions/workflows/main.yml/badge.svg?branch=main)]
+# cypress-trusted-types ![ContinuousBuild](https://github.com/siegrift/cypress-trusted-types/actions/workflows/main.yml/badge.svg?branch=main)
 
 > A library to simplify Cypress e2e testing of Trusted Types compliant applications
 
