@@ -141,12 +141,12 @@ testing frameworks and I can relate to this experience.
 ### Out of the box support
 
 There are many frameworks and libraries which already
-[support Trusted Types](https://github.com/w3c/webappsec-trusted-types/wiki/Integrations) and actually Cypress has the
+[support Trusted Types](https://github.com/w3c/webappsec-trusted-types/wiki/Integrations) and actually Cypress provides
 support for Trusted Types out of the box.
 
 This means that if you have a Trusted Types compliant application, you can use Cypress to launch it in the integrated
-browser and the app will just work _(\*some restrictions apply)_. This is because Cypress commands (including jQuery) do
-not modify the DOM, but instead only query it (make read only operations) which does not cause Trusted Types violations.
+browser and the app will just work _(\*some restrictions apply)_. This is because Cypress loads your application in an
+iframe and the Cypress commands run outside the frame, where Trusted Types are disabled.
 
 ### Cross browser support
 
