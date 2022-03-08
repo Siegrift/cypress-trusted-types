@@ -114,7 +114,31 @@ function runTests(url) {
   });
 }
 
-// // Run the tests where the server sends the CSP header directly
-runTests('/');
-// // Run the tests where the CSP is set inside the meta tag in the returned html
-runTests('meta-csp/');
+describe('chrome spec', { browser: 'chrome' }, () => {
+  describe('enableCspThroughMetaTag', () => {
+    it('applies the TT CSP header', () => {
+      cy.enableCspThroughMetaTag();
+      cy.visit('/');
+      cy.catchTrustedTypesViolations();
+
+      cy.contains('unsafe html').click();
+      cy.assertTrustedTypesViolation('TrustedHTML');
+    });
+
+    it('needs to be called before the site is visited', () => {
+      cy.visit('/');
+      cy.enableCspThroughMetaTag(); // Too late now
+      cy.catchTrustedTypesViolations();
+
+      cy.contains('unsafe html').click();
+
+      cy.assertZeroTrustedTypesViolation();
+      cy.get('iframe').should('exist');
+    });
+  });
+
+  // Run the tests where the server sends the CSP header directly
+  runTests('/');
+  // Run the tests where the CSP is set inside the meta tag in the returned html
+  runTests('meta-csp/');
+});

@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint and compile
     steps:
-      - name: Clone @siegrift/cypress-trusted-types
+      - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Node
         uses: actions/setup-node@v2
@@ -37,7 +37,16 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [12.x, 16.x]
+        browser: [chrome, firefox]
     steps:
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'yarn'
       - name: Checkout
         uses: actions/checkout@v2
         # Install NPM dependencies, cache them correctly and run all Cypress tests
@@ -46,6 +55,7 @@ jobs:
         with:
           build: yarn build
           start: yarn test:start-server
+          browser: ${{ matrix.browser }}
 
   required-checks-passed:
     name: All required checks passed
