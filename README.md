@@ -178,5 +178,6 @@ successfully. For example, make sure that iframe is present on the page instead 
 To publish run:
 
 ```sh
+yarn version
 yarn publish --access public
 ```
