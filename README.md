@@ -180,4 +180,5 @@ To publish run:
 ```sh
 yarn version
 yarn publish --access public
+git push --follow-tags
 ```
