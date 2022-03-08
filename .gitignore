@@ -4,3 +4,4 @@
 /build
 /cypress/fixtures
 /cypress/videos
+/.DS_Store
