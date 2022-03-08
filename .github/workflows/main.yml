@@ -46,7 +46,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-          cache: 'yarn'
       - name: Checkout
         uses: actions/checkout@v2
         # Install NPM dependencies, cache them correctly and run all Cypress tests
