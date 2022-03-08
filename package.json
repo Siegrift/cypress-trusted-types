@@ -1,6 +1,6 @@
 {
   "name": "@siegrift/cypress-trusted-types",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "repository": "git@github.com:Siegrift/cypress-trusted-types.git",

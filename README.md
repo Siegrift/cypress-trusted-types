@@ -172,3 +172,11 @@ without the help of an user. More importantly though, such tests are too low lev
 that the value was properly sanitized/came through policy, prefer asserting that a certain "feature" worked
 successfully. For example, make sure that iframe is present on the page instead of checking that a value of an iframe
 `srcDoc` attribute was created by policy (the customers do not care whether you use Trusted Types or not).
+
+## Developer docs
+
+To publish run:
+
+```sh
+yarn publish --access public
+```

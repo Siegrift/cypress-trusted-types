@@ -5,3 +5,4 @@
 /cypress/fixtures
 /cypress/videos
 /.DS_Store
+*.log
