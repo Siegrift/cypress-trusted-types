@@ -4,6 +4,8 @@ const safeScriptElem = document.getElementById('safe-script');
 const unsafeScriptElem = document.getElementById('unsafe-script');
 const safeScriptUrlElem = document.getElementById('safe-script-url');
 const unsafeScriptUrlElem = document.getElementById('unsafe-script-url');
+const duplicatePolicyElem = document.getElementById('duplicate-policy');
+const newPolicyElem = document.getElementById('new-policy');
 
 // In real world application make sure the policy is enclosed in module (not exported)
 // and it's usage is restricted.
@@ -62,4 +64,12 @@ unsafeScriptUrlElem.addEventListener('click', () => {
   script.src = './my-script';
 
   document.body.append(script);
+});
+
+duplicatePolicyElem.addEventListener('click', () => {
+  window.trustedTypes.createPolicy('my-policy', {});
+});
+
+newPolicyElem.addEventListener('click', () => {
+  window.trustedTypes.createPolicy('new-policy', {});
 });

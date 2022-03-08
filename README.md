@@ -70,9 +70,10 @@ The most important are the following two methods:
   ```js
   cy.contains('unsafe html').click();
   cy.contains('unsafe html').click();
+  cy.contains('duplicate policy').click();
   cy.contains('unsafe script').click();
 
-  cy.assertTrustedTypesViolations(['TrustedHTML', 'TrustedHTML', 'TrustedScript']);
+  cy.assertTrustedTypesViolations(['TrustedHTML', 'TrustedHTML', 'PolicyCreation', 'TrustedScript']);
   ```
 
 - `assertTrustedTypesViolation` - similar to the assertion above, but expects only a single Trusted Types violation.
@@ -96,14 +97,10 @@ The most important are the following two methods:
 - `getTrustedTypesViolations` - low level API to get the Trusted Types violations to make custom assertions against.
 
   ```js
-  cy.contains('unsafe html').click();
-  cy.contains('unsafe script').click();
+  cy.contains('new policy').click();
 
   cy.getTrustedTypesViolations().then((violations) => {
-    expect(violations).to.have.length(2);
-    // Violation is an object with shape: {message: string, error: Error}
-    expect(violations[0].message).to.equal("This document requires 'TrustedHTML' assignment.");
-    expect(violations[1].message).to.equal("This document requires 'TrustedScript' assignment.");
+    expect(violations[0].error.message).to.contain('Policy "new-policy" disallowed.');
   });
   ```
 
