@@ -7,4 +7,4 @@ export interface EnableCspThroughMetaTagOptions {
   urlPattern?: string;
 }
 
-export type TrustedValue = 'TrustedHTML' | 'TrustedScript' | 'TrustedScriptURL';
+export type ViolationType = 'TrustedHTML' | 'TrustedScript' | 'TrustedScriptURL' | 'PolicyCreation';

@@ -1,5 +1,5 @@
 /// <reference path="./index.d.ts" />
-import { EnableCspThroughMetaTagOptions, TrustedValue, Violation } from './types';
+import { EnableCspThroughMetaTagOptions, ViolationType, Violation } from './types';
 
 let catchTrustedTypesViolationsEnabled = false;
 let trustedTypesViolations: Violation[] = [];
@@ -38,7 +38,8 @@ Cypress.Commands.add('parseCspFromMetaTags', () => {
   });
 });
 
-function formatViolationMessage(type: TrustedValue) {
+function formatViolationMessage(type: ViolationType) {
+  if (type === 'PolicyCreation') return "Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory'";
   return `This document requires '${type}' assignment.`;
 }
 
@@ -50,12 +51,21 @@ Cypress.Commands.add('catchTrustedTypesViolations', () => {
   // https://docs.cypress.io/api/events/catalog-of-events#To-catch-a-single-uncaught-exception
   // @ts-expect-error: The function violates the "noImplicitReturn" rule, but cypress types requires this
   cy.on('uncaught:exception', (err) => {
-    const violationTypes = ['TrustedHTML', 'TrustedScript', 'TrustedScriptURL'];
-
-    const type = violationTypes.find((type) => err.message.includes(formatViolationMessage(type as TrustedValue)));
+    const violationTypes = ['TrustedHTML', 'TrustedScript', 'TrustedScriptURL'] as const;
+    const type = violationTypes.find((type) => err.message.includes(formatViolationMessage(type)));
     if (type) {
       trustedTypesViolations.push({
-        message: formatViolationMessage(type as TrustedValue),
+        message: formatViolationMessage(type),
+        error: err,
+      });
+      // Return false to prevent the error from failing this test
+      return false;
+    }
+
+    const policyCreationErrorMessage = formatViolationMessage('PolicyCreation');
+    if (err.message.includes(policyCreationErrorMessage)) {
+      trustedTypesViolations.push({
+        message: policyCreationErrorMessage,
         error: err,
       });
       // Return false to prevent the error from failing this test
@@ -64,7 +74,7 @@ Cypress.Commands.add('catchTrustedTypesViolations', () => {
   });
 });
 
-Cypress.Commands.add('assertTrustedTypesViolations', (expectedTypes: TrustedValue[]) => {
+Cypress.Commands.add('assertTrustedTypesViolations', (expectedTypes: ViolationType[]) => {
   cy.getTrustedTypesViolations().then((_actual) => {
     const actual = _actual as Violation[];
     expect(actual).to.have.length(expectedTypes.length);
@@ -75,7 +85,7 @@ Cypress.Commands.add('assertTrustedTypesViolations', (expectedTypes: TrustedValu
   });
 });
 
-Cypress.Commands.add('assertTrustedTypesViolation', (expectedType: TrustedValue) => {
+Cypress.Commands.add('assertTrustedTypesViolation', (expectedType: ViolationType) => {
   cy.assertTrustedTypesViolations([expectedType]);
 });
 

@@ -75,9 +75,10 @@ function runTests(url) {
     it('clearTrustedTypesViolations', () => {
       cy.contains('unsafe html').click();
       cy.contains('unsafe html').click();
+      cy.contains('duplicate policy').click();
       cy.contains('unsafe script').click();
 
-      cy.assertTrustedTypesViolations(['TrustedHTML', 'TrustedHTML', 'TrustedScript']);
+      cy.assertTrustedTypesViolations(['TrustedHTML', 'TrustedHTML', 'PolicyCreation', 'TrustedScript']);
     });
 
     it('getTrustedTypesViolations', () => {
@@ -109,6 +110,26 @@ function runTests(url) {
 
       it('should not know about the violations of previous test', () => {
         cy.assertZeroTrustedTypesViolation();
+      });
+    });
+
+    describe('disallowed policy creation', () => {
+      it('policy already created', () => {
+        cy.contains('duplicate policy').click();
+
+        cy.assertTrustedTypesViolation('PolicyCreation');
+        cy.getTrustedTypesViolations().then((violations) => {
+          expect(violations[0].error.message).to.contain('Policy with name "my-policy" already exists.');
+        });
+      });
+
+      it('policy not listed in CSP', () => {
+        cy.contains('new policy').click();
+
+        cy.assertTrustedTypesViolation('PolicyCreation');
+        cy.getTrustedTypesViolations().then((violations) => {
+          expect(violations[0].error.message).to.contain('Policy "new-policy" disallowed.');
+        });
       });
     });
   });
