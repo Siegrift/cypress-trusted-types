@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <meta http-equiv="Content-Security-Policy" content="require-trusted-types-for 'script'; trusted-types default;" />
+
+    <title>Basic application to be tested with cypress</title>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <div>
+      <button id="def-html">default html</button>
+      <button id="def-script">default script</button>
+      <button id="def-script-url">non existent script url</button>
+    </div>
+  </body>
+
+  <script>
+    trustedTypes.createPolicy('default', {
+      createHTML: (s) => s,
+      createScript: (s) => s,
+    });
+
+    const b1 = document.getElementById('def-html');
+    const b2 = document.getElementById('def-script');
+    const b3 = document.getElementById('def-script-url');
+
+    b1.addEventListener('click', () => {
+      const elem = document.createElement('div');
+      elem.innerHTML = 'html';
+      document.body.append(elem);
+    });
+    b2.addEventListener('click', () => {
+      const script = document.createElement('script');
+      script.textContent =
+        'const span = document.createElement("span");span.textContent = "created from script";document.body.append(span)';
+
+      document.body.append(script);
+    });
+    b3.addEventListener('click', () => (document.createElement('script').src = 'script src'));
+  </script>
+</html>

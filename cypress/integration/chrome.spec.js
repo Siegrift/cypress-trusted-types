@@ -19,7 +19,7 @@ function runTests(url) {
     it('disallows untrusted TrustedHTML', () => {
       cy.contains('unsafe html').click();
 
-      cy.assertTrustedTypesViolation('TrustedHTML');
+      cy.assertTrustedTypesViolation({ type: 'TrustedHTML' });
       cy.get('iframe').should('not.exist');
     });
 
@@ -36,7 +36,7 @@ function runTests(url) {
       cy.get('script').should('have.length', 2);
       cy.contains('unsafe script').click();
 
-      cy.assertTrustedTypesViolation('TrustedScript');
+      cy.assertTrustedTypesViolation({ type: 'TrustedScript' });
       cy.contains('created from script').should('not.exist');
       cy.get('script').should('have.length', 2);
     });
@@ -54,14 +54,14 @@ function runTests(url) {
       cy.get('script').should('have.length', 2);
       cy.contains('unsafe script url').click();
 
-      cy.assertTrustedTypesViolation('TrustedScriptURL');
+      cy.assertTrustedTypesViolation({ type: 'TrustedScriptURL' });
       cy.contains('created from script').should('not.exist');
       cy.get('script').should('have.length', 2);
     });
 
     it('clearTrustedTypesViolations', () => {
       cy.contains('unsafe html').click();
-      cy.assertTrustedTypesViolation('TrustedHTML');
+      cy.assertTrustedTypesViolation({ type: 'TrustedHTML' });
 
       // Clears previous violations
       cy.clearTrustedTypesViolations();
@@ -69,16 +69,28 @@ function runTests(url) {
 
       // But does NOT prevent further violations
       cy.contains('unsafe script').click();
-      cy.assertTrustedTypesViolation('TrustedScript');
+      cy.assertTrustedTypesViolation({ type: 'TrustedScript' });
     });
 
-    it('clearTrustedTypesViolations', () => {
+    it('assertTrustedTypesViolations', () => {
       cy.contains('unsafe html').click();
       cy.contains('unsafe html').click();
       cy.contains('duplicate policy').click();
       cy.contains('unsafe script').click();
 
-      cy.assertTrustedTypesViolations(['TrustedHTML', 'TrustedHTML', 'PolicyCreation', 'TrustedScript']);
+      cy.assertTrustedTypesViolations([
+        {
+          type: 'TrustedHTML',
+          message:
+            "Failed to set the 'srcdoc' property on 'HTMLIFrameElement': This document requires 'TrustedHTML' assignment.",
+        },
+        {}, // No assertion is made for this violation
+        {
+          type: 'TrustedTypePolicyFactory',
+          message: `Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory': Policy with name "my-policy" already exists.`,
+        },
+        { type: 'TrustedScript' },
+      ]);
     });
 
     it('getTrustedTypesViolations', () => {
@@ -87,8 +99,12 @@ function runTests(url) {
 
       cy.getTrustedTypesViolations().then((violations) => {
         expect(violations).to.have.length(2);
-        expect(violations[0].message).to.equal("This document requires 'TrustedHTML' assignment.");
-        expect(violations[1].message).to.equal("This document requires 'TrustedScript' assignment.");
+        expect(violations[0].message).to.equal(
+          "Failed to set the 'srcdoc' property on 'HTMLIFrameElement': This document requires 'TrustedHTML' assignment."
+        );
+        expect(violations[1].message).to.equal(
+          "Failed to set the 'textContent' property on 'Node': This document requires 'TrustedScript' assignment."
+        );
       });
     });
 
@@ -99,7 +115,7 @@ function runTests(url) {
       cy.contains('unsafe html').click();
 
       // There should be just a single violation
-      cy.assertTrustedTypesViolation('TrustedHTML');
+      cy.assertTrustedTypesViolation({ type: 'TrustedHTML' });
     });
 
     describe('violations do NOT persist per test', () => {
@@ -117,7 +133,7 @@ function runTests(url) {
       it('policy already created', () => {
         cy.contains('duplicate policy').click();
 
-        cy.assertTrustedTypesViolation('PolicyCreation');
+        cy.assertTrustedTypesViolation({ type: 'TrustedTypePolicyFactory' });
         cy.getTrustedTypesViolations().then((violations) => {
           expect(violations[0].error.message).to.contain('Policy with name "my-policy" already exists.');
         });
@@ -126,7 +142,7 @@ function runTests(url) {
       it('policy not listed in CSP', () => {
         cy.contains('new policy').click();
 
-        cy.assertTrustedTypesViolation('PolicyCreation');
+        cy.assertTrustedTypesViolation({ type: 'TrustedTypePolicyFactory' });
         cy.getTrustedTypesViolations().then((violations) => {
           expect(violations[0].error.message).to.contain('Policy "new-policy" disallowed.');
         });
@@ -143,7 +159,7 @@ describe('chrome spec', { browser: 'chrome' }, () => {
       cy.catchTrustedTypesViolations();
 
       cy.contains('unsafe html').click();
-      cy.assertTrustedTypesViolation('TrustedHTML');
+      cy.assertTrustedTypesViolation({ type: 'TrustedHTML' });
     });
 
     it('needs to be called before the site is visited', () => {
@@ -155,6 +171,33 @@ describe('chrome spec', { browser: 'chrome' }, () => {
 
       cy.assertZeroTrustedTypesViolation();
       cy.get('iframe').should('exist');
+    });
+  });
+
+  it('supports TT', () => {
+    expect(window.trustedTypes).not.to.be.undefined;
+  });
+
+  describe('default policy', () => {
+    beforeEach(() => {
+      cy.enableCspThroughMetaTag();
+      cy.visit('/meta-csp/default-policy');
+      cy.catchTrustedTypesViolations();
+    });
+
+    it('pipes the html value through', () => {
+      cy.contains('default html').click();
+      cy.contains('html').should('be.visible');
+    });
+
+    it('pipes the script value through', () => {
+      cy.contains('default script').click();
+      cy.contains('created from script').should('be.visible');
+    });
+
+    it('catches TT violation for default policy', () => {
+      cy.contains('non existent script url').click();
+      cy.assertTrustedTypesViolation({ type: 'TrustedScriptURL' });
     });
   });
 

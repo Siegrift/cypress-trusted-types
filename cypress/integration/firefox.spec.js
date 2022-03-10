@@ -10,4 +10,8 @@ describe('firefox behaviour', { browser: 'firefox' }, () => {
     // The call above should produce a violation if TT were supported
     cy.assertZeroTrustedTypesViolation();
   });
+
+  it('does NOT support TT', () => {
+    expect(window.trustedTypes).to.be.undefined;
+  });
 });

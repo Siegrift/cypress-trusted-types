@@ -38,10 +38,31 @@ Cypress.Commands.add('parseCspFromMetaTags', () => {
   });
 });
 
-function formatViolationMessage(type: ViolationType) {
-  if (type === 'PolicyCreation') return "Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory'";
-  return `This document requires '${type}' assignment.`;
+/**
+ * Heuristic to extract the Trusted Types violation from the uncaught Cypress error caused by Trusted Types violation.
+ *
+ * @param err uncaught Cypress error caused by Trusted Types violation
+ * @returns the extracted Trusted Types violation
+ */
+function extractViolationMessage(err: Error) {
+  return err.message
+    .replace('The following error originated from your application code, not from Cypress.\n\n  >', '')
+    .replace(
+      'When Cypress detects uncaught errors originating from your application it will automatically fail the current test.\n\nThis behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.',
+      ''
+    )
+    .trim();
 }
+
+/**
+ * Quotes the violation type. This is another heuristic to check for Trusted Types violations.
+ *
+ * @param type the violation type to quote
+ * @returns quoted string
+ */
+const quote = (type: ViolationType) => `'${type}'`;
+
+const violationTypes = ['TrustedHTML', 'TrustedScript', 'TrustedScriptURL', 'TrustedTypePolicyFactory'] as const;
 
 Cypress.Commands.add('catchTrustedTypesViolations', () => {
   if (catchTrustedTypesViolationsEnabled) return;
@@ -51,21 +72,11 @@ Cypress.Commands.add('catchTrustedTypesViolations', () => {
   // https://docs.cypress.io/api/events/catalog-of-events#To-catch-a-single-uncaught-exception
   // @ts-expect-error: The function violates the "noImplicitReturn" rule, but cypress types requires this
   cy.on('uncaught:exception', (err) => {
-    const violationTypes = ['TrustedHTML', 'TrustedScript', 'TrustedScriptURL'] as const;
-    const type = violationTypes.find((type) => err.message.includes(formatViolationMessage(type)));
+    const type = violationTypes.find((type) => err.message.includes(quote(type)));
     if (type) {
       trustedTypesViolations.push({
-        message: formatViolationMessage(type),
-        error: err,
-      });
-      // Return false to prevent the error from failing this test
-      return false;
-    }
-
-    const policyCreationErrorMessage = formatViolationMessage('PolicyCreation');
-    if (err.message.includes(policyCreationErrorMessage)) {
-      trustedTypesViolations.push({
-        message: policyCreationErrorMessage,
+        type,
+        message: extractViolationMessage(err),
         error: err,
       });
       // Return false to prevent the error from failing this test
@@ -74,19 +85,22 @@ Cypress.Commands.add('catchTrustedTypesViolations', () => {
   });
 });
 
-Cypress.Commands.add('assertTrustedTypesViolations', (expectedTypes: ViolationType[]) => {
+Cypress.Commands.add('assertTrustedTypesViolations', (expected: Partial<Violation>[]) => {
   cy.getTrustedTypesViolations().then((_actual) => {
     const actual = _actual as Violation[];
-    expect(actual).to.have.length(expectedTypes.length);
+    expect(actual).to.have.length(expected.length);
 
-    return Cypress._.zip(actual, expectedTypes).forEach(([act, expType]) => {
-      expect(act!.message).to.equal(formatViolationMessage(expType!));
+    return Cypress._.zip(actual, expected).forEach(([act, exp]) => {
+      Cypress._.forEach(exp!, (val, key) => {
+        console.log('wtf', act![key as keyof typeof act], val);
+        expect(act![key as keyof typeof act]).to.equal(val);
+      });
     });
   });
 });
 
-Cypress.Commands.add('assertTrustedTypesViolation', (expectedType: ViolationType) => {
-  cy.assertTrustedTypesViolations([expectedType]);
+Cypress.Commands.add('assertTrustedTypesViolation', (expected: Partial<Violation>) => {
+  cy.assertTrustedTypesViolations([expected]);
 });
 
 Cypress.Commands.add('assertZeroTrustedTypesViolation', () => {

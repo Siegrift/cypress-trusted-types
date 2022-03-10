@@ -13,6 +13,8 @@ function getStaticResponseFile(url) {
       return join(__dirname, 'app/main.js');
     case '/my-script':
       return join(__dirname, 'app/my-script.js');
+    case '/default-policy':
+      return join(__dirname, 'app/default-policy.html');
     default:
       null;
   }

@@ -12,8 +12,8 @@ declare global {
     interface Chainable<Subject = any> {
       enableCspThroughMetaTag(options?: EnableCspThroughMetaTagOptions): Chainable<void>;
       catchTrustedTypesViolations(): Chainable<void>;
-      assertTrustedTypesViolations(expectedTypes: ViolationType[]): Chainable<void>;
-      assertTrustedTypesViolation(expectedType: ViolationType): Chainable<void>;
+      assertTrustedTypesViolations(expectedTypes: Partial<Violation>[]): Chainable<void>;
+      assertTrustedTypesViolation(expectedType: Partial<Violation>): Chainable<void>;
       assertZeroTrustedTypesViolation(): Chainable<void>;
       getTrustedTypesViolations(): Chainable<Violation[]>;
       clearTrustedTypesViolations(): Chainable<Violation[]>;

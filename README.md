@@ -1,6 +1,6 @@
 # cypress-trusted-types ![ContinuousBuild](https://github.com/siegrift/cypress-trusted-types/actions/workflows/main.yml/badge.svg?branch=main)
 
-> A library to simplify Cypress e2e testing of Trusted Types compliant applications
+> A library to simplify Cypress e2e testing of Trusted Types violations
 
 ## Installation
 
@@ -29,7 +29,7 @@ cy.visit('/'); // Make sure to call "enableCspThroughMetaTag" before the site is
 cy.catchTrustedTypesViolations(); // Starts catching Trusted Types violations
 
 cy.contains('unsafe html').click();
-cy.assertTrustedTypesViolation('TrustedHTML');
+cy.assertTrustedTypesViolation({ type: 'TrustedHTML' });
 cy.get('iframe').should('not.exist');
 ```
 
@@ -73,7 +73,19 @@ The most important are the following two methods:
   cy.contains('duplicate policy').click();
   cy.contains('unsafe script').click();
 
-  cy.assertTrustedTypesViolations(['TrustedHTML', 'TrustedHTML', 'PolicyCreation', 'TrustedScript']);
+  cy.assertTrustedTypesViolations([
+    {
+      type: 'TrustedHTML',
+      message:
+        "Failed to set the 'srcdoc' property on 'HTMLIFrameElement': This document requires 'TrustedHTML' assignment.",
+    },
+    {}, // No assertion is made for this violation
+    {
+      type: 'TrustedTypePolicyFactory',
+      message: `Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory': Policy with name "my-policy" already exists.`,
+    },
+    { type: 'TrustedScript' },
+  ]);
   ```
 
 - `assertTrustedTypesViolation` - similar to the assertion above, but expects only a single Trusted Types violation.
@@ -81,7 +93,7 @@ The most important are the following two methods:
   ```js
   cy.contains('unsafe html').click();
 
-  cy.assertTrustedTypesViolation('TrustedHTML');
+  cy.assertTrustedTypesViolation({ type: 'TrustedHTML' });
   cy.get('iframe').should('not.exist');
   ```
 
@@ -108,7 +120,7 @@ The most important are the following two methods:
 
   ```js
   cy.contains('unsafe html').click();
-  cy.assertTrustedTypesViolation('TrustedHTML');
+  cy.assertTrustedTypesViolation({ type: 'TrustedHTML' });
 
   // Clears previous violations
   cy.clearTrustedTypesViolations();
@@ -116,7 +128,7 @@ The most important are the following two methods:
 
   // But does NOT prevent further violations
   cy.contains('unsafe script').click();
-  cy.assertTrustedTypesViolation('TrustedScript');
+  cy.assertTrustedTypesViolation({ type: 'TrustedScript' });
   ```
 
 #### Other commands
@@ -142,11 +154,12 @@ testing frameworks and I can relate to this experience.
 
 There are many frameworks and libraries which already
 [support Trusted Types](https://github.com/w3c/webappsec-trusted-types/wiki/Integrations) and actually Cypress provides
-support for Trusted Types out of the box.
+support for Trusted Types out of the box if you launch the test in a browser which supports Trusted Types.
 
 This means that if you have a Trusted Types compliant application, you can use Cypress to launch it in the integrated
-browser and the app will just work _(\*some restrictions apply)_. This is because Cypress loads your application in an
-iframe and the Cypress commands run outside the frame, where Trusted Types are disabled.
+browser and the app will just work since the Cypress commands mostly use read only queries which do not produce Trusted
+Types violations. _(I haven't checked all Cypress commands and plugins so it is possible that there are some which will
+not work)_.
 
 ### Cross browser support
 
