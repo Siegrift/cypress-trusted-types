@@ -92,7 +92,6 @@ Cypress.Commands.add('assertTrustedTypesViolations', (expected: Partial<Violatio
 
     return Cypress._.zip(actual, expected).forEach(([act, exp]) => {
       Cypress._.forEach(exp!, (val, key) => {
-        console.log('wtf', act![key as keyof typeof act], val);
         expect(act![key as keyof typeof act]).to.equal(val);
       });
     });

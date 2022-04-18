@@ -188,6 +188,17 @@ successfully. For example, make sure that iframe is present on the page instead 
 
 ## Developer docs
 
+### Running tests
+
+```sh
+# Start the development server
+yarn test:start-server
+# Open cypress tests
+yarn cypress:open
+```
+
+### Publishing
+
 To publish run:
 
 ```sh
